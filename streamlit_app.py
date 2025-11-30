@@ -43,6 +43,7 @@ if training_id is None:
             """
             INSERT INTO training (start_time, user_id, training_type_id)
             VALUES (%s, %s, %s)
+            RETURNING id
             """,
             (datetime.now(), user_id, training_type_id)
         )
