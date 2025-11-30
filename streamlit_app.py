@@ -15,8 +15,8 @@ cursor = conn.cursor()
 # TODO: better structure for user (for the moment, it supposes that user names are unique)
 cursor.execute("SELECT id, name FROM app_user")
 users = cursor.fetchall()
-st.title("Select who you are")
-current_user = st.selectbox("I am ", [t[1] for t in users])
+st.title("Progression Tracker")
+current_user = st.selectbox("Je suis:", [t[1] for t in users])
 user_id = next(u[0] for u in users if u[1] == current_user)
 
 cursor.execute(
@@ -37,7 +37,7 @@ if st.session_state.training_id is None:
         "Type d'entrainement :",
         [t[1] for t in training_types]
     )
-    if st.button("Start Training"):
+    if st.button("Commencer mon entrainement"):
         training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
         cursor.execute(
             """
