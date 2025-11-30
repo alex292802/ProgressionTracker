@@ -1,6 +1,6 @@
 import streamlit as st
 import psycopg2
-import datetime
+from datetime import datetime
 
 cfg = st.secrets["neon"]
 conn = psycopg2.connect(
