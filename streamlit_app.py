@@ -21,7 +21,6 @@ if not training_started:
     cursor.execute("SELECT name FROM training_type")
     training_types = [row[0] for row in cursor.fetchall()]
     st.selectbox("Type d'entrainement :", training_types)
-    current_user = st.selectbox("I am ", users)
     if st.button("Start Training"):
         # TODO: add training to databse
         training_started = True
