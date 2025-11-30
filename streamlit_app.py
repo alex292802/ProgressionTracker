@@ -36,11 +36,11 @@ else:
     if st.session_state.training_id is None:
         cursor.execute("SELECT id, name FROM training_type")
         training_types = cursor.fetchall()
+        selected_training = st.selectbox(
+            "Type d'entrainement :",
+            [t[1] for t in training_types]
+        )
         if st.button("Commencer mon entrainement"):
-            selected_training = st.selectbox(
-                "Type d'entrainement :",
-                [t[1] for t in training_types]
-            )
             training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
             cursor.execute(
                 """
