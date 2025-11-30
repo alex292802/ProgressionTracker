@@ -1,5 +1,6 @@
 import streamlit as st
 import psycopg2
+import datetime
 
 cfg = st.secrets["neon"]
 conn = psycopg2.connect(
@@ -11,12 +12,17 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
-cursor.execute("SELECT name FROM app_user")
-users = [row[0] for row in cursor.fetchall()]
+# TODO: better structure for user (for the moment, it supposes that user names are unique)
+cursor.execute("SELECT id, name FROM app_user")
+users = cursor.fetchall()
 st.title("Select who you are")
-current_user = st.selectbox("I am ", users)
+current_user = st.selectbox("I am ", [t[1] for t in users])
+user_id = next(u[0] for u in users if u[1] == current_user)
 
-cursor.execute("SELECT id FROM training WHERE end_time IS NULL")
+cursor.execute(
+    "SELECT id FROM training WHERE end_time IS NULL AND user_id = %s",
+    (user_id,)
+)
 on_going_trainings_ids = [row[0] for row in cursor.fetchall()]
 
 if len(on_going_trainings_ids) == 0:
@@ -25,12 +31,23 @@ else:
     training_id = on_going_trainings_ids[0]
 
 if training_id is None:
-    cursor.execute("SELECT name FROM training_type")
-    training_types = [row[0] for row in cursor.fetchall()]
-    st.selectbox("Type d'entrainement :", training_types)
+    cursor.execute("SELECT id, name FROM training_type")
+    training_types = cursor.fetchall()
+    selected_training = st.selectbox(
+        "Type d'entrainement :",
+        [t[1] for t in training_types]
+    )
     if st.button("Start Training"):
-        # TODO: add training to databse
-        training_started = True
+        training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
+        cursor.execute(
+            """
+            INSERT INTO training (start_time, user_id, training_type_id)
+            VALUES (%s, %s, %s, %s)
+            """,
+            (datetime.now(), user_id, training_type_id)
+        )
+        training_id = cursor.fetchone()[0]
+        conn.commit()
 else:
     cursor.execute("SELECT name FROM exercice")
     exercises_list = [row[0] for row in cursor.fetchall()]
