@@ -14,12 +14,13 @@ cursor = conn.cursor()
 
 st.title("Progression Tracker")
 
-if st.session_state.user_id is None:
+if "user_id" in st.session_state:
     # TODO: better structure for user (for the moment, it supposes that user names are unique)
     cursor.execute("SELECT id, name FROM app_user")
     users = cursor.fetchall()
     current_user = st.selectbox("Je suis:", [t[1] for t in users])
-    user_id = next(u[0] for u in users if u[1] == current_user)
+    if st.button(f"Confirmer que je suis {current_user}"):
+        st.session_state.user_id = next(u[0] for u in users if u[1] == current_user)
 else:
     cursor.execute(
         "SELECT id FROM training WHERE end_time IS NULL AND user_id = %s",
