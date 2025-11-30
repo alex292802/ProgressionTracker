@@ -42,7 +42,7 @@ if training_id is None:
         cursor.execute(
             """
             INSERT INTO training (start_time, user_id, training_type_id)
-            VALUES (%s, %s, %s, %s)
+            VALUES (%s, %s, %s)
             """,
             (datetime.now(), user_id, training_type_id)
         )
