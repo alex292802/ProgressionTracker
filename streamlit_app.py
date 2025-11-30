@@ -14,7 +14,7 @@ cursor = conn.cursor()
 cursor.execute("SELECT name FROM app_user")
 users = [row[0] for row in cursor.fetchall()]
 st.title("Select who you are")
-current_user = st.selectbox(users)
+current_user = st.selectbox("I am ", users)
 
 if "training_started" not in st.session_state:
     st.session_state["training_started"] = False
@@ -27,7 +27,6 @@ if not st.session_state["training_started"]:
 
 cursor.execute("SELECT name FROM exercice")
 exercises_list = [row[0] for row in cursor.fetchall()]
-# --- UI ---
 st.write("Track down a series:")
 exercise = st.selectbox("Exercise:", exercises_list)
 weight = st.number_input("Weight: ", min_value=0)
