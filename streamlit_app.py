@@ -31,7 +31,7 @@ if training_id is None:
     if st.button("Start Training"):
         # TODO: add training to databse
         training_started = True
-
+else:
     cursor.execute("SELECT name FROM exercice")
     exercises_list = [row[0] for row in cursor.fetchall()]
     st.write("Track down a series:")
@@ -40,5 +40,5 @@ if training_id is None:
     reps = st.number_input("Reps: ", min_value=0)
     rir = st.number_input("RIR: ", min_value=0)
 
-    cursor.close()
-    conn.close()
+cursor.close()
+conn.close()
