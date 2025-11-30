@@ -15,7 +15,6 @@ cursor = conn.cursor()
 st.title("Progression Tracker")
 
 if "user_id" not in st.session_state:
-    # TODO: better structure for user (for the moment, it supposes that user names are unique)
     cursor.execute("SELECT id, name FROM app_user")
     users = cursor.fetchall()
     current_user = st.selectbox("Je suis:", [t[1] for t in users])
@@ -37,11 +36,11 @@ else:
     if st.session_state.training_id is None:
         cursor.execute("SELECT id, name FROM training_type")
         training_types = cursor.fetchall()
-        selected_training = st.selectbox(
-            "Type d'entrainement :",
-            [t[1] for t in training_types]
-        )
         if st.button("Commencer mon entrainement"):
+            selected_training = st.selectbox(
+                "Type d'entrainement :",
+                [t[1] for t in training_types]
+            )
             training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
             cursor.execute(
                 """
@@ -55,13 +54,24 @@ else:
             conn.commit()
             st.rerun()
     else:
-        cursor.execute("SELECT name FROM exercice")
-        exercises_list = [row[0] for row in cursor.fetchall()]
-        st.write("Track down a series:")
-        exercise = st.selectbox("Exercise:", exercises_list)
+        cursor.execute("SELECT id, name FROM exercice")
+        exercises_list = cursor.fetchall()
+        st.write("Ajouter une série:")
+        exercise = st.selectbox("Exercice:", [row[1] for row in exercises_list])
         weight = st.number_input("Poids: ", min_value=0)
         reps = st.number_input("Reps: ", min_value=0)
         rir = st.number_input("RIR: ", min_value=0)
+
+        if st.button("Ajouter la série"):
+            exercise_id = next(e[0] for e in exercises_list if e[1] == exercises_list)
+            cursor.execute(
+                """
+                INSERT INTO series (training_id, exercice_id, weight, reps, rir, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                (st.session_state.training_id, exercise_id, weight, reps, rir, datetime.now())
+            )
+            conn.commit()
 
         if st.button("Terminer le training"):
             cursor.execute(
