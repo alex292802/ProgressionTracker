@@ -11,7 +11,7 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
-cursor.execute("SELECT name FROM user")
+cursor.execute("SELECT name FROM app_user")
 users = [row[0] for row in cursor.fetchall()]
 st.title("Select who you are")
 current_user = st.selectbox(users)
