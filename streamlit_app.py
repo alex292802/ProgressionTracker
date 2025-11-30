@@ -53,6 +53,7 @@ else:
             )
             st.session_state.training_id = cursor.fetchone()[0]
             conn.commit()
+            st.rerun()
     else:
         cursor.execute("SELECT name FROM exercice")
         exercises_list = [row[0] for row in cursor.fetchall()]
@@ -61,6 +62,16 @@ else:
         weight = st.number_input("Poids: ", min_value=0)
         reps = st.number_input("Reps: ", min_value=0)
         rir = st.number_input("RIR: ", min_value=0)
+
+        if st.button("Terminer le training"):
+            cursor.execute(
+                "UPDATE training SET end_time = %s WHERE id = %s",
+                (datetime.now(), st.session_state.training_id)
+            )
+            conn.commit()
+            st.session_state.training_id = None
+            st.success("Training terminé !")
+            st.rerun()
 
 cursor.close()
 conn.close()
