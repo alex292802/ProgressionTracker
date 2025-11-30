@@ -26,11 +26,11 @@ cursor.execute(
 on_going_trainings_ids = [row[0] for row in cursor.fetchall()]
 
 if len(on_going_trainings_ids) == 0:
-    training_id = None
+    st.session_state.training_id = None
 else:
-    training_id = on_going_trainings_ids[0]
+    st.session_state.training_id = on_going_trainings_ids[0]
 
-if training_id is None:
+if st.session_state.training_id is None:
     cursor.execute("SELECT id, name FROM training_type")
     training_types = cursor.fetchall()
     selected_training = st.selectbox(
@@ -47,7 +47,7 @@ if training_id is None:
             """,
             (datetime.now(), user_id, training_type_id)
         )
-        training_id = cursor.fetchone()[0]
+        st.session_state.training_id = cursor.fetchone()[0]
         conn.commit()
 else:
     cursor.execute("SELECT name FROM exercice")
