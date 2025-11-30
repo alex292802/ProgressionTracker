@@ -63,7 +63,7 @@ else:
         rir = st.number_input("RIR: ", min_value=0)
 
         if st.button("Ajouter la série"):
-            exercise_id = next(e[0] for e in exercises_list if e[1] == exercises_list)
+            exercise_id = next(e[0] for e in exercises_list if e[1] == exercise)
             cursor.execute(
                 """
                 INSERT INTO series (training_id, exercice_id, weight, reps, rir, created_at)
@@ -72,6 +72,7 @@ else:
                 (st.session_state.training_id, exercise_id, weight, reps, rir, datetime.now())
             )
             conn.commit()
+            st.success("Série ajoutée avec succès !")
 
         if st.button("Terminer le training"):
             cursor.execute(
