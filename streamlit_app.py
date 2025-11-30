@@ -21,7 +21,7 @@ if "user_id" not in st.session_state:
     current_user = st.selectbox("Je suis:", [t[1] for t in users])
     if st.button(f"Confirmer que je suis {current_user}"):
         st.session_state.user_id = next(u[0] for u in users if u[1] == current_user)
-        st.experimental_rerun() 
+        st.rerun()
 else:
     cursor.execute(
         "SELECT id FROM training WHERE end_time IS NULL AND user_id = %s",
