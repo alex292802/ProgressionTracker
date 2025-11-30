@@ -16,14 +16,16 @@ users = [row[0] for row in cursor.fetchall()]
 st.title("Select who you are")
 current_user = st.selectbox("I am ", users)
 
-if "training_started" not in st.session_state:
-    st.session_state["training_started"] = False
-
-if not st.session_state["training_started"]:
+training_started = False
+if not training_started:
+    cursor.execute("SELECT name FROM training_type")
+    training_types = [row[0] for row in cursor.fetchall()]
+    st.selectbox("Type d'entrainement :", training_types)
+    current_user = st.selectbox("I am ", users)
     if st.button("Start Training"):
-        st.session_state["training_started"] = True
-    else:
-        st.stop()
+        # TODO: add training to databse
+        training_started = True
+
 
 cursor.execute("SELECT name FROM exercice")
 exercises_list = [row[0] for row in cursor.fetchall()]
