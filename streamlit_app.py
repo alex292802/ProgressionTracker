@@ -14,7 +14,7 @@ cursor = conn.cursor()
 
 st.title("Progression Tracker")
 
-if "user_id" in st.session_state:
+if "user_id" not in st.session_state:
     # TODO: better structure for user (for the moment, it supposes that user names are unique)
     cursor.execute("SELECT id, name FROM app_user")
     users = cursor.fetchall()
