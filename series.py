@@ -1,4 +1,5 @@
 import streamlit as st
+from datetime import datetime
 
 def add_series(cursor, conn, training_id):
     cursor.execute("SELECT id, name FROM exercice")
