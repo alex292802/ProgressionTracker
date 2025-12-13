@@ -54,18 +54,18 @@ st.title("Progression Tracker")
 
 if "user_id" not in st.session_state:
     cursor.execute("SELECT id, name FROM app_user")
-    users = cursor.fetchall(dictionary=True)
-    current_user = st.selectbox("Je suis:", [u["name"] for u in users])
+    users = cursor.fetchall()
+    current_user = st.selectbox("Je suis:", [t[1] for t in users])
     if st.button(f"Confirmer que je suis {current_user}"):
-        st.session_state.user_id = next(u["id"] for u in users if u["name"] == current_user)
+        st.session_state.user_id = next(u[0] for u in users if u[1] == current_user)
         st.rerun()
 else:
     cursor.execute(
-        "SELECT id FROM training AND user_id = %s",
+        "SELECT id, end_time FROM training WHERE user_id = %s",
         (st.session_state.user_id,)
     )
-    users_trainings = cursor.fetchall(dictionary=True)
-    on_going_trainings_ids = [row["id"] for row in users_trainings if row["end_time"] is None]
+    users_trainings = cursor.fetchall()
+    on_going_trainings_ids = [row[0] for row in users_trainings if row[1] is None]
 
     if len(on_going_trainings_ids) == 0:
         st.session_state.training_id = None
@@ -75,14 +75,14 @@ else:
     if st.session_state.training_id is None:
         if getattr(st.session_state, "shown_training_id", None) is None:
             cursor.execute("SELECT id, name FROM training_type")
-            training_types = cursor.fetchall(dictionary=True)
+            training_types = cursor.fetchall()
             selected_training = st.selectbox(
                 "Type d'entrainement :",
-                [t["name"] for t in training_types]
+                [t[1] for t in training_types]
             )
             st.subheader("Commencer un nouvel entrainement")
             if st.button("Lancer mon entrainement"):
-                training_type_id = next(t["id"] for t in training_types if t["name"] == selected_training)
+                training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
                 cursor.execute(
                     """
                     INSERT INTO training (start_time, user_id, training_type_id)
