@@ -1,3 +1,5 @@
+import streamlit as st
+
 def render_training_recap(cursor, training_id):
     cursor.execute(
         """
