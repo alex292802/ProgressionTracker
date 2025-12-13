@@ -95,7 +95,7 @@ else:
                 conn.commit()
                 st.rerun()
             st.subheader("Mes entrainements précédents")
-            past_training_id = st.selectbox("Entrainement du :", [t["id"] for t in users_trainings])
+            past_training_id = st.selectbox("Entrainement du :", [t[0] for t in users_trainings])
             if st.button("Afficher le détail"):
                 st.session_state.shown_training_id = past_training_id
                 st.rerun()
