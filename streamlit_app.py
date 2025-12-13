@@ -71,8 +71,8 @@ else:
     else:
         st.session_state.training_id = on_going_trainings_ids[0]
 
-    if getattr(st.session_state, "training_id", None) is None:
-        if st.session_state.shown_training_id is None:
+    if st.session_state.training_id is None:
+        if getattr(st.session_state, "shown_training_id", None) is None:
             cursor.execute("SELECT id, name FROM training_type")
             training_types = cursor.fetchall()
             selected_training = st.selectbox(
