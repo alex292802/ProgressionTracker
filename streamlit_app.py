@@ -54,8 +54,8 @@ st.title("Progression Tracker")
 
 if "user_id" not in st.session_state:
     cursor.execute("SELECT id, name FROM app_user")
-    users = cursor.fetchall(dicctionary=True)
-    current_user = st.selectbox("Je suis:", [u["name"]] for u in users])
+    users = cursor.fetchall(dictionary=True)
+    current_user = st.selectbox("Je suis:", [u["name"] for u in users])
     if st.button(f"Confirmer que je suis {current_user}"):
         st.session_state.user_id = next(u["id"] for u in users if u["name"] == current_user)
         st.rerun()
@@ -95,7 +95,7 @@ else:
                 conn.commit()
                 st.rerun()
             st.subheader("Mes entrainements précédents")
-            past_training_id = st.selectbox("Entrainement du :", [t["id"]] for t in users_trainings])
+            past_training_id = st.selectbox("Entrainement du :", [t["id"] for t in users_trainings])
             if st.button("Afficher le détail"):
                 st.session_state.shown_training_id = past_training_id
                 st.rerun()
