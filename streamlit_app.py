@@ -54,17 +54,18 @@ st.title("Progression Tracker")
 
 if "user_id" not in st.session_state:
     cursor.execute("SELECT id, name FROM app_user")
-    users = cursor.fetchall()
-    current_user = st.selectbox("Je suis:", [t[1] for t in users])
+    users = cursor.fetchall(dicctionary=True)
+    current_user = st.selectbox("Je suis:", [u["name"]] for u in users])
     if st.button(f"Confirmer que je suis {current_user}"):
-        st.session_state.user_id = next(u[0] for u in users if u[1] == current_user)
+        st.session_state.user_id = next(u["id"] for u in users if u["name"] == current_user)
         st.rerun()
 else:
     cursor.execute(
-        "SELECT id FROM training WHERE end_time IS NULL AND user_id = %s",
+        "SELECT id FROM training AND user_id = %s",
         (st.session_state.user_id,)
     )
-    on_going_trainings_ids = [row[0] for row in cursor.fetchall()]
+    users_trainings = cursor.fetchall(dictionary=True)
+    on_going_trainings_ids = [row["id"] for row in users_trainings if row["end_time"] is None]
 
     if len(on_going_trainings_ids) == 0:
         st.session_state.training_id = None
@@ -74,16 +75,14 @@ else:
     if st.session_state.training_id is None:
         if getattr(st.session_state, "shown_training_id", None) is None:
             cursor.execute("SELECT id, name FROM training_type")
-            training_types = cursor.fetchall()
+            training_types = cursor.fetchall(dictionary=True)
             selected_training = st.selectbox(
                 "Type d'entrainement :",
-                [t[1] for t in training_types]
+                [t["name"] for t in training_types]
             )
-            if st.button("Show previous trainings"):
-                st.session_state.shown_training_id = None # FIXME
-
-            if st.button("Commencer mon entrainement"):
-                training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
+            st.subheader("Commencer un nouvel entrainement")
+            if st.button("Lancer mon entrainement"):
+                training_type_id = next(t["id"] for t in training_types if t["name"] == selected_training)
                 cursor.execute(
                     """
                     INSERT INTO training (start_time, user_id, training_type_id)
@@ -94,6 +93,11 @@ else:
                 )
                 st.session_state.training_id = cursor.fetchone()[0]
                 conn.commit()
+                st.rerun()
+            st.subheader("Mes entrainements précédents")
+            past_training_id = st.selectbox("Entrainement du :", [t["id"]] for t in users_trainings])
+            if st.button("Afficher le détail"):
+                st.session_state.shown_training_id = past_training_id
                 st.rerun()
         else:
             render_training_recap(cursor, st.session_state.shown_training_id)
