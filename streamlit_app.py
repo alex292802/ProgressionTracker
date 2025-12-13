@@ -2,6 +2,44 @@ import streamlit as st
 import psycopg2
 from datetime import datetime
 
+
+def render_training_recap(cursor, training_id):
+    cursor.execute(
+        """
+        SELECT 
+            e.name AS exercice,
+            s.weight,
+            s.reps,
+            s.rir,
+            s.created_at
+        FROM series s
+        JOIN exercice e ON e.id = s.exercice_id
+        WHERE s.training_id = %s
+        ORDER BY e.name, s.created_at
+        """,
+        (training_id,)
+    )
+    rows = cursor.fetchall()
+
+    if not rows:
+        st.info("Aucune série enregistrée pour ce training.")
+        return
+
+    st.subheader("📊 Récapitulatif du training")
+
+    current_exercice = None
+    for exercice, weight, reps, rir, created_at in rows:
+        if exercice != current_exercice:
+            st.markdown(f"### 🏋️ {exercice}")
+            current_exercice = exercice
+
+        st.write(
+            f"- **{weight} kg** × **{reps} reps** | RIR: {rir} "
+            f"_(⏱ {created_at.strftime('%H:%M')})_"
+        )
+
+
+
 cfg = st.secrets["neon"]
 conn = psycopg2.connect(
     host=cfg["host"],
@@ -33,26 +71,32 @@ else:
     else:
         st.session_state.training_id = on_going_trainings_ids[0]
 
-    if st.session_state.training_id is None:
-        cursor.execute("SELECT id, name FROM training_type")
-        training_types = cursor.fetchall()
-        selected_training = st.selectbox(
-            "Type d'entrainement :",
-            [t[1] for t in training_types]
-        )
-        if st.button("Commencer mon entrainement"):
-            training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
-            cursor.execute(
-                """
-                INSERT INTO training (start_time, user_id, training_type_id)
-                VALUES (%s, %s, %s)
-                RETURNING id
-                """,
-                (datetime.now(), st.session_state.user_id, training_type_id)
+    if getattr(st.session_state.training_id, None) is None:
+        if st.session_state.shown_training_id is None:
+            cursor.execute("SELECT id, name FROM training_type")
+            training_types = cursor.fetchall()
+            selected_training = st.selectbox(
+                "Type d'entrainement :",
+                [t[1] for t in training_types]
             )
-            st.session_state.training_id = cursor.fetchone()[0]
-            conn.commit()
-            st.rerun()
+            if st.button("Show previous trainings"):
+                st.session_state.shown_training_id = None # FIXME
+
+            if st.button("Commencer mon entrainement"):
+                training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
+                cursor.execute(
+                    """
+                    INSERT INTO training (start_time, user_id, training_type_id)
+                    VALUES (%s, %s, %s)
+                    RETURNING id
+                    """,
+                    (datetime.now(), st.session_state.user_id, training_type_id)
+                )
+                st.session_state.training_id = cursor.fetchone()[0]
+                conn.commit()
+                st.rerun()
+        else:
+            render_training_recap(cursor, st.session_state.shown_training_id)
     else:
         cursor.execute("SELECT id, name FROM exercice")
         exercises_list = cursor.fetchall()
@@ -80,6 +124,7 @@ else:
                 (datetime.now(), st.session_state.training_id)
             )
             conn.commit()
+            st.session_state.shown_training_id = st.session_state.training_id
             st.session_state.training_id = None
             st.success("Training terminé !")
             st.rerun()
