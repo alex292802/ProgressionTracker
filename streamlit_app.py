@@ -95,7 +95,12 @@ else:
                 conn.commit()
                 st.rerun()
             st.subheader("Mes entrainements précédents")
-            past_training_id = st.selectbox("Entrainement du :", [t[1] for t in users_trainings if t[1] is not None])
+            past_training = st.selectbox(
+                "Entrainement du :",
+                options=users_trainings,
+                format_func=lambda t: t[1].strftime("%d/%m/%Y à %H:%M")
+            )
+            past_training_id = past_training[0]
             if st.button("Afficher le détail"):
                 st.session_state.shown_training_id = past_training_id
                 st.rerun()
