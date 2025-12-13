@@ -55,9 +55,9 @@ st.title("Progression Tracker")
 if "user_id" not in st.session_state:
     cursor.execute("SELECT id, name FROM app_user")
     users = cursor.fetchall()
-    current_user = st.selectbox("Je suis:", [t[1] for t in users])
+    current_user = st.selectbox("Je suis:", options=users, format_func=lambda u: u[1])
     if st.button(f"Confirmer que je suis {current_user}"):
-        st.session_state.user_id = next(u[0] for u in users if u[1] == current_user)
+        st.session_state.user_id = current_user[0]
         st.rerun()
 else:
     cursor.execute(
@@ -79,10 +79,11 @@ else:
             st.subheader("Commencer un nouvel entrainement")
             selected_training = st.selectbox(
                 "Type d'entrainement :",
-                [t[1] for t in training_types]
+                options=training_types,
+                format_func=lambda t: t[1]
             )
             if st.button("Lancer mon entrainement"):
-                training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
+                training_type_id = selected_training[0]
                 cursor.execute(
                     """
                     INSERT INTO training (start_time, user_id, training_type_id)
@@ -110,13 +111,13 @@ else:
         cursor.execute("SELECT id, name FROM exercice")
         exercises_list = cursor.fetchall()
         st.write("Ajouter une série:")
-        exercise = st.selectbox("Exercice:", [row[1] for row in exercises_list])
+        exercise = st.selectbox("Exercice:", options=exercises_list, format_func=lambda e: e[1])
         weight = st.number_input("Poids: ", min_value=0)
         reps = st.number_input("Reps: ", min_value=0)
         rir = st.number_input("RIR: ", min_value=0)
 
         if st.button("Ajouter la série"):
-            exercise_id = next(e[0] for e in exercises_list if e[1] == exercise)
+            exercise_id = exercise[0]
             cursor.execute(
                 """
                 INSERT INTO series (training_id, exercice_id, weight, reps, rir, created_at)
