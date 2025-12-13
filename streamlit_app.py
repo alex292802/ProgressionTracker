@@ -2,7 +2,8 @@ import streamlit as st
 import psycopg2
 from datetime import datetime
 
-from training_overview import render_training_recap
+from training import render_training_recap, get_ongoing_training_id, start_new_training, select_past_training
+from user import select_user
 
 cfg = st.secrets["neon"]
 conn = psycopg2.connect(
@@ -17,11 +18,9 @@ cursor = conn.cursor()
 st.title("Progression Tracker")
 
 if "user_id" not in st.session_state:
-    cursor.execute("SELECT id, name FROM app_user")
-    users = cursor.fetchall()
-    current_user = st.selectbox("Je suis:", options=users, format_func=lambda u: u[1])
-    if st.button(f"Confirmer"):
-        st.session_state.user_id = current_user[0]
+    user_id = select_user(cursor)
+    if user_id:
+        st.session_state.user_id = user_id
         st.rerun()
 else:
     cursor.execute(
@@ -29,46 +28,11 @@ else:
         (st.session_state.user_id,)
     )
     users_trainings = cursor.fetchall()
-    on_going_trainings_ids = [row[0] for row in users_trainings if row[1] is None]
-
-    if len(on_going_trainings_ids) == 0:
-        st.session_state.training_id = None
-    else:
-        st.session_state.training_id = on_going_trainings_ids[0]
-
+    st.session_state.training_id = get_ongoing_training_id(users_trainings)
     if st.session_state.training_id is None:
         if getattr(st.session_state, "shown_training_id", None) is None:
-            cursor.execute("SELECT id, name FROM training_type")
-            training_types = cursor.fetchall()
-            st.subheader("Commencer un nouvel entrainement")
-            selected_training = st.selectbox(
-                "Type d'entrainement :",
-                options=training_types,
-                format_func=lambda t: t[1]
-            )
-            if st.button("Lancer mon entrainement"):
-                training_type_id = selected_training[0]
-                cursor.execute(
-                    """
-                    INSERT INTO training (start_time, user_id, training_type_id)
-                    VALUES (%s, %s, %s)
-                    RETURNING id
-                    """,
-                    (datetime.now(), st.session_state.user_id, training_type_id)
-                )
-                st.session_state.training_id = cursor.fetchone()[0]
-                conn.commit()
-                st.rerun()
-            st.subheader("Mes entrainements précédents")
-            past_training = st.selectbox(
-                "Entrainement du :",
-                options=users_trainings,
-                format_func=lambda t: t[1].strftime("%d/%m/%Y à %H:%M")
-            )
-            past_training_id = past_training[0]
-            if st.button("Afficher le détail"):
-                st.session_state.shown_training_id = past_training_id
-                st.rerun()
+            st.session_state.training_id = start_new_training(cursor, conn, st.session_state.user_id)
+            st.session_state.shown_training_id = select_past_training(users_trainings)
         else:
             render_training_recap(cursor, st.session_state.shown_training_id)
     else:
