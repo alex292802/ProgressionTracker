@@ -56,7 +56,7 @@ if "user_id" not in st.session_state:
     cursor.execute("SELECT id, name FROM app_user")
     users = cursor.fetchall()
     current_user = st.selectbox("Je suis:", options=users, format_func=lambda u: u[1])
-    if st.button(f"Confirmer que je suis {current_user[0]}"):
+    if st.button(f"Confirmer"):
         st.session_state.user_id = current_user[0]
         st.rerun()
 else:
