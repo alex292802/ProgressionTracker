@@ -76,11 +76,11 @@ else:
         if getattr(st.session_state, "shown_training_id", None) is None:
             cursor.execute("SELECT id, name FROM training_type")
             training_types = cursor.fetchall()
+            st.subheader("Commencer un nouvel entrainement")
             selected_training = st.selectbox(
                 "Type d'entrainement :",
                 [t[1] for t in training_types]
             )
-            st.subheader("Commencer un nouvel entrainement")
             if st.button("Lancer mon entrainement"):
                 training_type_id = next(t[0] for t in training_types if t[1] == selected_training)
                 cursor.execute(
@@ -95,7 +95,7 @@ else:
                 conn.commit()
                 st.rerun()
             st.subheader("Mes entrainements précédents")
-            past_training_id = st.selectbox("Entrainement du :", [t[0] for t in users_trainings])
+            past_training_id = st.selectbox("Entrainement du :", [t[1] for t in users_trainings if t[1] is not None])
             if st.button("Afficher le détail"):
                 st.session_state.shown_training_id = past_training_id
                 st.rerun()
