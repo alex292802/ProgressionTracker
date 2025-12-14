@@ -49,7 +49,7 @@ def add_series(cursor, conn, training_id):
     else:
         last_weight, last_reps, last_rir = 0, 0, 0
     
-    weight = st.number_input("Poids:", min_value=0, value=float(last_weight))
+    weight = st.number_input("Poids:", min_value=0.0, value=float(last_weight))
     reps = st.number_input("Reps:", min_value=0, value=int(last_reps))
     rir = st.number_input("RIR:", min_value=0, value=int(last_rir))
 
