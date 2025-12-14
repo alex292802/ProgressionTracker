@@ -2,7 +2,7 @@ import streamlit as st
 import psycopg2
 from datetime import datetime
 
-from training import render_training_recap, get_ongoing_training_id, start_new_training, select_past_training
+from training import render_training_recap, get_ongoing_training_id, start_new_training, select_past_training, finish_training
 from user import select_user
 from series import add_series
 
@@ -39,15 +39,7 @@ else:
     else:
         add_series(cursor, conn, st.session_state.training_id)
         if st.button("Terminer le training"):
-            cursor.execute(
-                "UPDATE training SET end_time = %s WHERE id = %s",
-                (datetime.now(), st.session_state.training_id)
-            )
-            conn.commit()
-            st.session_state.shown_training_id = st.session_state.training_id
-            st.session_state.training_id = None
-            st.success("Training terminé !")
-            st.rerun()
+            finish_training(cursor, conn, st.session_state.training_id)
 
 cursor.close()
 conn.close()

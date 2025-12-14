@@ -80,3 +80,7 @@ def render_training_recap(cursor, training_id):
             f"- **{weight} kg** × **{reps} reps** | RIR: {rir} "
             f"_(⏱ {created_at.strftime('%H:%M')})_"
         )
+    
+    if st.button("Terminer"):
+        st.session_state.shown_training_id = None
+        st.rerun()
