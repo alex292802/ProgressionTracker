@@ -1,6 +1,5 @@
 import streamlit as st
 import psycopg2
-from datetime import datetime
 
 from training import render_training_recap, get_ongoing_training_id, start_new_training, select_past_training, finish_training
 from user import select_user

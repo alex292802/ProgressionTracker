@@ -40,6 +40,19 @@ def start_new_training(cursor, conn, user_id):
 
     return None
 
+def finish_training(cursor, conn, training_id):
+    cursor.execute(
+        "UPDATE training SET end_time = %s WHERE id = %s",
+        (datetime.now(), training_id)
+    )
+    conn.commit()
+
+    st.session_state.shown_training_id = training_id
+    st.session_state.training_id = None
+
+    st.success("Training terminé !")
+    st.rerun()
+
 def get_ongoing_training_id(trainings):
     for training_id, end_time in trainings:
         if end_time is None:
