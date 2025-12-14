@@ -97,16 +97,16 @@ def render_training_recap(cursor, training_id):
     
     for muscle, exercices in muscle_map.items():
         total_series = sum(len(series) for series in exercices.values())
-        st.markdown(f"##💪 {muscle} — {total_series} séries")
+        st.markdown(f"## 💪 {muscle} — {total_series} séries")
         for exercice, series in exercices.items():
-            st.markdown(f"### 🏋️ {exercice} ({len(series)} séries)")
-            for i, s in enumerate(series, 1):
-                st.write(
-                    f"- Série {i} : "
-                    f"**{s['weight']} kg** | "
-                    f"**{s['reps']} reps** | "
-                    f"**RIR {s['rir']}**"
-                )
+            with st.expander(f"🏋️ {exercice} ({len(series)} séries)", expanded=False):
+                for i, s in enumerate(series, 1):
+                    st.write(
+                        f"- Série {i} : "
+                        f"**{s['weight']} kg** | "
+                        f"**{s['reps']} reps** | "
+                        f"**RIR {s['rir']}**"
+                    )
     
     if st.button("Terminer"):
         st.session_state.shown_training_id = None
