@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+from collections import defaultdict
 
 
 def select_past_training(users_trainings):
@@ -62,7 +63,8 @@ def get_ongoing_training_id(trainings):
 def render_training_recap(cursor, training_id):
     cursor.execute(
         """
-        SELECT 
+        SELECT
+            m.name AS muscle,
             e.name AS exercice,
             s.weight,
             s.reps,
@@ -70,8 +72,10 @@ def render_training_recap(cursor, training_id):
             s.created_at
         FROM series s
         JOIN exercice e ON e.id = s.exercice_id
+        JOIN exercice_muscle em ON em.exercice_id = e.id
+        JOIN muscle m ON m.id = em.muscle_id
         WHERE s.training_id = %s
-        ORDER BY e.name, s.created_at
+        ORDER BY m.name, e.name, s.created_at;
         """,
         (training_id,)
     )
@@ -80,19 +84,29 @@ def render_training_recap(cursor, training_id):
     if not rows:
         st.info("Aucune série enregistrée pour ce training.")
         return
+    
+    muscle_map = defaultdict(lambda: defaultdict(list))
+    for muscle, exercice, weight, reps, rir, created_at in rows:
+        muscle_map[muscle][exercice].append({
+            "weight": weight,
+            "reps": reps,
+            "rir": rir,
+        })
 
     st.subheader("📊 Récapitulatif du training")
-
-    current_exercice = None
-    for exercice, weight, reps, rir, created_at in rows:
-        if exercice != current_exercice:
-            st.markdown(f"### 🏋️ {exercice}")
-            current_exercice = exercice
-
-        st.write(
-            f"- **{weight} kg** × **{reps} reps** | RIR: {rir} "
-            f"_(⏱ {created_at.strftime('%H:%M')})_"
-        )
+    
+    for muscle, exercices in muscle_map.items():
+        total_series = sum(len(series) for series in exercices.values())
+        st.markdown(f"##💪 {muscle} — {total_series} séries")
+        for exercice, series in exercices.items():
+            st.markdown(f"### 🏋️ {exercice} ({len(series)} séries)")
+            for i, s in enumerate(series, 1):
+                st.write(
+                    f"- Série {i} : "
+                    f"**{s['weight']} kg** | "
+                    f"**{s['reps']} reps** | "
+                    f"**RIR {s['rir']}**"
+                )
     
     if st.button("Terminer"):
         st.session_state.shown_training_id = None
