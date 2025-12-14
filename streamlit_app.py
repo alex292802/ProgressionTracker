@@ -25,7 +25,7 @@ if "user_id" not in st.session_state:
         st.rerun()
 else:
     cursor.execute(
-        "SELECT id, end_time FROM training WHERE user_id = %s",
+        "SELECT id, end_time FROM training WHERE user_id = %s ORDER BY end_time DESC",
         (st.session_state.user_id,)
     )
     users_trainings = cursor.fetchall()
