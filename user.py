@@ -124,5 +124,8 @@ def invite_friend(cursor, current_user_id, base_url):
     cursor.connection.commit()
     
     invitation_link = f"{base_url}?token={token}"
-    st.success("Invitation créée avec succès !")
-    st.code(invitation_link, language="text")
+    with st.modal("Lien d'invitation"):
+        st.success("Invitation créée avec succès !")
+        st.code(invitation_link, language="text")
+        if st.button("Fermer"):
+            st.rerun()

@@ -25,25 +25,24 @@ if token:
     else:
         st.error("Lien d’invitation invalide ou expiré")
 elif "user_id" not in st.session_state:
+    # TODO: persist users information for session
     user_id = login(cursor)
     if user_id:
         st.session_state.user_id = user_id
         st.rerun()
 else:
     with st.sidebar:
-        st.markdown("### 👤 Compte")
-
+        # TODO: add user name in the sidebar
         if st.button("Inviter un ami"):
             invite_friend(
                 cursor,
                 st.session_state.user_id,
                 "https://progressiontracker.streamlit.app"
             )
-
         if st.button("Se déconnecter"):
             st.session_state.clear()
             st.rerun()
-            
+
     cursor.execute(
         "SELECT id, end_time FROM training WHERE user_id = %s ORDER BY end_time DESC",
         (st.session_state.user_id,)
@@ -54,9 +53,6 @@ else:
         if getattr(st.session_state, "shown_training_id", None) is None:
             st.session_state.training_id = start_new_training(cursor, conn, st.session_state.user_id)
             st.session_state.shown_training_id = select_past_training(users_trainings)
-            # TODO: add this to streamlit env var
-            if st.button("Inviter un ami"):
-                invite_friend(cursor, st.session_state.user_id, "https://progressiontracker.streamlit.app")
         else:
             render_training_recap(cursor, st.session_state.shown_training_id)
     else:
