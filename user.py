@@ -95,6 +95,7 @@ def add_user(cursor, token=None):
             st.error(f"Erreur lors de la création du compte")
             
 def invite_friend(cursor, current_user_id, base_url):
+    # TODO: extract below in function
     cursor.execute(
         """
         SELECT created_at FROM invitations
@@ -105,9 +106,8 @@ def invite_friend(cursor, current_user_id, base_url):
         (current_user_id,)
     )
     last_invitation_date = cursor.fetchone()
-    
     if last_invitation_date:
-        if datetime.utcnow() - last_invitation_date < timedelta(hours=24):
+        if datetime.utcnow() - last_invitation_date[0] < timedelta(hours=24):
             st.error("Vous avez déjà créé une invitation dans les dernières 24 heures.")
             return
 
