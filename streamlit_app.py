@@ -2,7 +2,7 @@ import streamlit as st
 import psycopg2
 
 from training import render_training_recap, get_ongoing_training_id, start_new_training, select_past_training, finish_training
-from user import login, add_user, is_valid_token
+from user import login, add_user, is_valid_token, invite_friend
 from series import add_series
 
 cfg = st.secrets["neon"]
@@ -40,6 +40,7 @@ else:
         if getattr(st.session_state, "shown_training_id", None) is None:
             st.session_state.training_id = start_new_training(cursor, conn, st.session_state.user_id)
             st.session_state.shown_training_id = select_past_training(users_trainings)
+            invite_friend(cursor)
         else:
             render_training_recap(cursor, st.session_state.shown_training_id)
     else:

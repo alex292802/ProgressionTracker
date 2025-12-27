@@ -1,7 +1,7 @@
 import streamlit as st
 import secrets
 from argon2 import PasswordHasher
-from datetime import datetime
+from datetime import datetime, timedelta
 
 ph = PasswordHasher()
 
@@ -93,3 +93,36 @@ def add_user(cursor, token=None):
             st.success("Compte créé avec succès !")
         except Exception as e:
             st.error(f"Erreur lors de la création du compte")
+            
+def invite_friend(cursor, current_user_id, base_url):
+    cursor.execute(
+        """
+        SELECT created_at FROM invitations
+        WHERE invited_by = %s
+        ORDER BY created_at DESC
+        LIMIT 1
+        """,
+        (current_user_id,)
+    )
+    last_invitation_date = cursor.fetchone()
+    
+    if last_invitation_date:
+        if datetime.utcnow() - last_invitation_date < timedelta(hours=24):
+            st.error("Vous avez déjà créé une invitation dans les dernières 24 heures.")
+            return
+
+    token = generate_invitation_token()
+    expires_at = datetime.utcnow() + timedelta(hours=1)
+    cursor.execute(
+        """
+        INSERT INTO invitations (token, created_by, expires_at, is_expired)
+        VALUES (%s, %s, %s, %s, FALSE)
+        """,
+        (token, current_user_id, expires_at)
+    )
+    
+    cursor.connection.commit()
+    
+    invitation_link = f"{base_url}?token={token}"
+    st.success("Invitation créée avec succès !")
+    st.code(invitation_link, language="text")
