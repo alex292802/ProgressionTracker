@@ -19,7 +19,7 @@ st.title("Progression Tracker")
 
 token = st.query_params.get("token")
 
-if token and not st.session_state.user_id:
+if token and not getattr(st.session_state, "user_id", None):
     if is_valid_token(cursor, token):
         user_id = add_user(cursor, conn, token)
         st.session_state.user_id = user_id
