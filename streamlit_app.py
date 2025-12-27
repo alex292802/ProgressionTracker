@@ -20,7 +20,7 @@ st.title("Progression Tracker")
 token = st.experimental_get_query_params().get("token", [None])[0]
 
 if token:
-    if is_valid_token(token):
+    if is_valid_token(cursor, token):
         add_user(cursor, token)
     else:
         st.error("Lien d’invitation invalide ou expiré")
