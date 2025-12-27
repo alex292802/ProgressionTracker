@@ -2,6 +2,7 @@ import streamlit as st
 import secrets
 from argon2 import PasswordHasher
 from datetime import datetime, timedelta
+from streamlit_modal import Modal
 
 ph = PasswordHasher()
 
@@ -124,8 +125,4 @@ def invite_friend(cursor, current_user_id, base_url):
     cursor.connection.commit()
     
     invitation_link = f"{base_url}?token={token}"
-    with st.modal("Lien d'invitation"):
-        st.success("Invitation créée avec succès !")
-        st.code(invitation_link, language="text")
-        if st.button("Fermer"):
-            st.rerun()
+    modal = Modal(title="Lien d'invitation")
