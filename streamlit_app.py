@@ -2,7 +2,7 @@ import streamlit as st
 import psycopg2
 
 from training import render_training_recap, get_ongoing_training_id, start_new_training, select_past_training, finish_training
-from login import login
+from user import login, add_user, is_valid_token
 from series import add_series
 
 cfg = st.secrets["neon"]
@@ -17,7 +17,14 @@ cursor = conn.cursor()
 
 st.title("Progression Tracker")
 
-if "user_id" not in st.session_state:
+token = st.experimental_get_query_params().get("token", [None])[0]
+
+if token:
+    if is_valid_token(token):
+        add_user(cursor, token)
+    else:
+        st.error("Lien d’invitation invalide ou expiré")
+elif "user_id" not in st.session_state:
     user_id = login(cursor)
     if user_id:
         st.session_state.user_id = user_id
