@@ -95,7 +95,7 @@ def add_user(cursor, token=None):
             st.error(f"Erreur lors de la création du compte")
             
 def invite_friend(cursor, current_user_id, base_url):
-    # TODO: extract below in function
+    # TODO: extract code below in function
     cursor.execute(
         """
         SELECT created_at FROM invitations
