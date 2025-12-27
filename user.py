@@ -115,10 +115,10 @@ def invite_friend(cursor, current_user_id, base_url):
     expires_at = datetime.utcnow() + timedelta(hours=1)
     cursor.execute(
         """
-        INSERT INTO invitations (token, created_by, expires_at, is_expired)
+        INSERT INTO invitations (token, invited_by, created_at, expires_at, is_expired)
         VALUES (%s, %s, %s, %s, FALSE)
         """,
-        (token, current_user_id, expires_at)
+        (token, current_user_id, datetime.utcnow(), expires_at)
     )
     
     cursor.connection.commit()
