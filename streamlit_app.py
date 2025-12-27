@@ -30,6 +30,20 @@ elif "user_id" not in st.session_state:
         st.session_state.user_id = user_id
         st.rerun()
 else:
+    with st.sidebar:
+        st.markdown("### 👤 Compte")
+
+        if st.button("Inviter un ami"):
+            invite_friend(
+                cursor,
+                st.session_state.user_id,
+                "https://progressiontracker.streamlit.app"
+            )
+
+        if st.button("Se déconnecter"):
+            st.session_state.clear()
+            st.rerun()
+            
     cursor.execute(
         "SELECT id, end_time FROM training WHERE user_id = %s ORDER BY end_time DESC",
         (st.session_state.user_id,)
