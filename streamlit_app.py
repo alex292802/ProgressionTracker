@@ -21,7 +21,9 @@ token = st.query_params.get("token")
 
 if token:
     if is_valid_token(cursor, token):
-        add_user(cursor, conn, token)
+        user_id = add_user(cursor, conn, token)
+        st.session_state.user_id = user_id
+        st.rerun()
     else:
         st.error("Lien d’invitation invalide ou expiré")
 elif "user_id" not in st.session_state:

@@ -83,9 +83,11 @@ def add_user(cursor, conn, token=None):
                 """
                 INSERT INTO app_user (user_name, hashed_password, invitation)
                 VALUES (%s, %s, %s)
+                RETURNING id
                 """,
                 (user_name, hashed, token)
             )
+            user_id = cursor.fetchone()[0]
             if token:
                 cursor.execute(
                     "UPDATE invitations SET is_expired = TRUE WHERE token=%s",
@@ -93,6 +95,7 @@ def add_user(cursor, conn, token=None):
                 )
             conn.commit()
             st.success("Compte créé avec succès !")
+            return user_id
         except Exception as e:
             st.error(f"Erreur lors de la création du compte")
             
