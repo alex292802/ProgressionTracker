@@ -2,7 +2,7 @@ import streamlit as st
 import psycopg2
 
 from training import render_training_recap, get_ongoing_training_id, start_new_training, select_past_training, finish_training
-from user import select_user
+from login import login
 from series import add_series
 
 cfg = st.secrets["neon"]
@@ -18,7 +18,7 @@ cursor = conn.cursor()
 st.title("Progression Tracker")
 
 if "user_id" not in st.session_state:
-    user_id = select_user(cursor)
+    user_id = login(cursor)
     if user_id:
         st.session_state.user_id = user_id
         st.rerun()
