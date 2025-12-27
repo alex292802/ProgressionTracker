@@ -17,7 +17,7 @@ cursor = conn.cursor()
 
 st.title("Progression Tracker")
 
-token = st.experimental_get_query_params().get("token", [None])[0]
+token = st.query_params.get("token")
 
 if token:
     if is_valid_token(cursor, token):
