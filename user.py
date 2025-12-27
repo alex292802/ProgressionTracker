@@ -68,7 +68,7 @@ def is_valid_token(cursor, token):
     return True
 
 
-def add_user(cursor, token=None):
+def add_user(cursor, conn, token=None):
     submitted, user_name, password = render_form("signup_form", "Créer mon compte")
     if submitted:
         if not are_fields_filled(user_name, password):
@@ -91,6 +91,7 @@ def add_user(cursor, token=None):
                     "UPDATE invitations SET is_expired = TRUE WHERE token=%s",
                     (token,)
                 )
+            conn.commit()
             st.success("Compte créé avec succès !")
         except Exception as e:
             st.error(f"Erreur lors de la création du compte")
