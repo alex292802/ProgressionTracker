@@ -6,11 +6,7 @@ from streamlit_modal import Modal
 
 ph = PasswordHasher()
 
-def generate_invitation_token():
-    token = secrets.token_urlsafe(16)
-    return token
-
-def render_form(form_key, submit_label):
+def get_user_informations(form_key, submit_label):
     with st.form(form_key):
         user_name = st.text_input("Nom d'utilisateur")
         password = st.text_input("Mot de passe", type="password")
@@ -23,16 +19,6 @@ def are_fields_filled(username, password):
         st.warning("Veuillez remplir tous les champs")
         return False
     return True
-
-def fetch_user(cursor, username, with_password=False):
-    base_request = "SELECT id"
-    if with_password:
-        base_request += ", hashed_password"
-    cursor.execute(
-        base_request + " FROM app_user WHERE user_name=%s",
-        (username,)
-    )
-    return cursor.fetchone()
 
 def persist_user_in_session(func):
     def wrapper(*args, **kwargs):
@@ -48,15 +34,19 @@ def persist_user_in_session(func):
 @persist_user_in_session
 def login(cursor):
     st.subheader("Se connecter")
-    submitted, user_name, password = render_form("login_form", "Se connecter")
+    submitted, user_name, password = get_user_informations("login_form", "Se connecter")
     if submitted:
         if not are_fields_filled(user_name, password):
             return
-        user = fetch_user(cursor, user_name, True)
-        if not user:
+        cursor.execute(
+            "SELECT id, hashed_password FROM app_user WHERE user_name=%s",
+            (user_name,)
+        )
+        user_infos = cursor.fetchone()
+        if not user_infos:
             st.error("Nom d'utilisateur inconnu")
             return
-        user_id, hashed_password = user
+        user_id, hashed_password = user_infos
         try:
             if ph.verify(hashed_password, password):
                 st.success("Login réussi !")
@@ -64,7 +54,6 @@ def login(cursor):
         except Exception:
             st.error("Mot de passe incorrect")
             return
-
 
 def is_valid_token(cursor, token):
     cursor.execute(
@@ -82,12 +71,15 @@ def is_valid_token(cursor, token):
 @persist_user_in_session
 def add_user(cursor, conn, token=None):
     st.subheader("Créer un compte")
-    submitted, user_name, password = render_form("signup_form", "Créer mon compte")
+    submitted, user_name, password = get_user_informations("signup_form", "Créer mon compte")
     if submitted:
         if not are_fields_filled(user_name, password):
             return
-        user = fetch_user(cursor, user_name)
-        if user:
+        cursor.execute(
+            "SELECT id FROM app_user WHERE user_name=%s",
+            (user_name,)
+        )
+        if cursor.fetchone():
             st.error("Nom d'utilisateur déjà utilisé")
             return   
         hashed = ph.hash(password)
@@ -111,8 +103,7 @@ def add_user(cursor, conn, token=None):
             return user_id
         except Exception as e:
             st.error(f"Erreur lors de la création du compte")
-
-# TODO: split this func ?  
+ 
 def invite_friend(cursor, current_user_id, base_url):
     cursor.execute(
         """
@@ -129,7 +120,7 @@ def invite_friend(cursor, current_user_id, base_url):
             st.error("Vous avez déjà créé une invitation dans les dernières 24 heures.")
             return
 
-    token = generate_invitation_token()
+    token = secrets.token_urlsafe(16)
     expires_at = datetime.utcnow() + timedelta(hours=1)
     cursor.execute(
         """
