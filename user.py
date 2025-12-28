@@ -104,7 +104,7 @@ def add_user(cursor, conn, token=None):
         except Exception as e:
             st.error(f"Erreur lors de la création du compte")
  
-def invite_friend(cursor, current_user_id, base_url):
+def invite_friend(cursor, current_user_id):
     cursor.execute(
         """
         SELECT created_at FROM invitations
