@@ -22,18 +22,11 @@ token = st.query_params.get("token")
 if token and not getattr(st.session_state, "user_id", None):
     if is_valid_token(cursor, token):
         user_id = add_user(cursor, conn, token)
-        # TODO: extract this in a function
-        if user_id:
-            st.session_state.user_id = user_id
-            st.rerun()
     else:
         st.error("Lien d’invitation invalide ou expiré")
 elif "user_id" not in st.session_state:
     # TODO: persist users information for session (use cookies ?)
     user_id = login(cursor)
-    if user_id:
-        st.session_state.user_id = user_id
-        st.rerun()
 else:
     with st.sidebar:
         # TODO: add user name in the sidebar

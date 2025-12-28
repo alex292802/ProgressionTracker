@@ -34,7 +34,18 @@ def fetch_user(cursor, username, with_password=False):
     )
     return cursor.fetchone()
 
+def persist_user_in_session(func):
+    def wrapper(*args, **kwargs):
+        if "user_id" in st.session_state:
+            return st.session_state.user_id
+        user_id = func(*args, **kwargs)
+        if user_id:
+            st.session_state.user_id = user_id
+            st.rerun()
+        return user_id
+    return wrapper
 
+@persist_user_in_session
 def login(cursor):
     submitted, user_name, password = render_form("login_form", "Se connecter")
     if submitted:
@@ -67,7 +78,7 @@ def is_valid_token(cursor, token):
         return False
     return True
 
-
+@persist_user_in_session
 def add_user(cursor, conn, token=None):
     submitted, user_name, password = render_form("signup_form", "Créer mon compte")
     if submitted:
