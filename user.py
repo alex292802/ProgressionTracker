@@ -47,6 +47,7 @@ def persist_user_in_session(func):
 
 @persist_user_in_session
 def login(cursor):
+    st.subheader("Se connecter")
     submitted, user_name, password = render_form("login_form", "Se connecter")
     if submitted:
         if not are_fields_filled(user_name, password):
@@ -80,6 +81,7 @@ def is_valid_token(cursor, token):
 
 @persist_user_in_session
 def add_user(cursor, conn, token=None):
+    st.subheader("Créer un compte")
     submitted, user_name, password = render_form("signup_form", "Créer mon compte")
     if submitted:
         if not are_fields_filled(user_name, password):
