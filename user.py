@@ -2,7 +2,6 @@ import streamlit as st
 import secrets
 from argon2 import PasswordHasher
 from datetime import datetime, timedelta
-from streamlit_modal import Modal
 
 ph = PasswordHasher()
 
@@ -130,8 +129,6 @@ def invite_friend(cursor, current_user_id):
         (token, current_user_id, datetime.utcnow(), expires_at)
     )
     cursor.connection.commit()
-
-    # TODO: use a modal here 
     st.success("Invitation créée avec succès !")
     st.code(f"https://progressiontracker.streamlit.app?token={token}", language="text")
     

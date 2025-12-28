@@ -25,7 +25,6 @@ if token and not getattr(st.session_state, "user_id", None):
     else:
         st.error("Lien d’invitation invalide ou expiré")
 elif "user_id" not in st.session_state:
-    # TODO: persist users information for session (use cookies ?)
     user_id = login(cursor)
 else:
     render_sidebar(cursor)
