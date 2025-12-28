@@ -2,7 +2,7 @@ import streamlit as st
 import psycopg2
 
 from training import render_training_recap, get_ongoing_training_id, start_new_training, select_past_training, finish_training
-from user import login, add_user, is_valid_token, invite_friend
+from user import login, add_user, is_valid_token, render_sidebar
 from series import add_series
 
 cfg = st.secrets["neon"]
@@ -28,14 +28,7 @@ elif "user_id" not in st.session_state:
     # TODO: persist users information for session (use cookies ?)
     user_id = login(cursor)
 else:
-    with st.sidebar:
-        # TODO: add user name in the sidebar
-        if st.button("Inviter un ami"):
-            invite_friend(cursor, st.session_state.user_id)
-        if st.button("Se déconnecter"):
-            st.session_state.clear()
-            st.rerun()
-
+    render_sidebar(cursor)
     cursor.execute(
         "SELECT id, end_time FROM training WHERE user_id = %s ORDER BY end_time DESC",
         (st.session_state.user_id,)

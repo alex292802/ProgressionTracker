@@ -134,3 +134,17 @@ def invite_friend(cursor, current_user_id, base_url):
     # TODO: use a modal here 
     st.success("Invitation créée avec succès !")
     st.code(f"https://progressiontracker.streamlit.app?token={token}", language="text")
+    
+def render_sidebar(cursor):
+    with st.sidebar:
+        cursor.execute(
+            "SELECT user_name FROM app_user WHERE id=%s",
+            (st.session_state.user_id,)
+        )
+        user_name = cursor.fetchone()[0]
+        st.markdown(f"### 👤 {user_name}")
+        if st.button("Inviter un ami"):
+            invite_friend(cursor, st.session_state.user_id)
+        if st.button("Se déconnecter"):
+            st.session_state.clear()
+            st.rerun()
