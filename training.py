@@ -83,30 +83,29 @@ def render_training_recap(cursor, training_id):
 
     if not rows:
         st.info("Aucune série enregistrée pour ce training.")
-        return
-    
-    muscle_map = defaultdict(lambda: defaultdict(list))
-    for muscle, exercice, weight, reps, rir, created_at in rows:
-        muscle_map[muscle][exercice].append({
-            "weight": weight,
-            "reps": reps,
-            "rir": rir,
-        })
+    else:
+        muscle_map = defaultdict(lambda: defaultdict(list))
+        for muscle, exercice, weight, reps, rir, created_at in rows:
+            muscle_map[muscle][exercice].append({
+                "weight": weight,
+                "reps": reps,
+                "rir": rir,
+            })
 
-    st.subheader("📊 Récapitulatif du training")
-    
-    for muscle, exercices in muscle_map.items():
-        total_series = sum(len(series) for series in exercices.values())
-        st.markdown(f"## {muscle} — {total_series} séries")
-        for exercice, series in exercices.items():
-            with st.expander(f"{exercice} ({len(series)} séries)", expanded=False):
-                for i, s in enumerate(series, 1):
-                    st.write(
-                        f"- Série {i} : "
-                        f"**{s['weight']} kg** | "
-                        f"**{s['reps']} reps** | "
-                        f"**RIR {s['rir']}**"
-                    )
+        st.subheader("📊 Récapitulatif du training")
+        
+        for muscle, exercices in muscle_map.items():
+            total_series = sum(len(series) for series in exercices.values())
+            st.markdown(f"## {muscle} — {total_series} séries")
+            for exercice, series in exercices.items():
+                with st.expander(f"{exercice} ({len(series)} séries)", expanded=False):
+                    for i, s in enumerate(series, 1):
+                        st.write(
+                            f"- Série {i} : "
+                            f"**{s['weight']} kg** | "
+                            f"**{s['reps']} reps** | "
+                            f"**RIR {s['rir']}**"
+                        )
     
     if st.button("Terminer"):
         st.session_state.shown_training_id = None
