@@ -109,9 +109,9 @@ def add_user(cursor, conn, token=None):
             return user_id
         except Exception as e:
             st.error(f"Erreur lors de la création du compte")
-            
+
+# TODO: split this func ?  
 def invite_friend(cursor, current_user_id, base_url):
-    # TODO: extract code below in function
     cursor.execute(
         """
         SELECT created_at FROM invitations
@@ -136,10 +136,8 @@ def invite_friend(cursor, current_user_id, base_url):
         """,
         (token, current_user_id, datetime.utcnow(), expires_at)
     )
-    
     cursor.connection.commit()
-    
-    invitation_link = f"{base_url}?token={token}"
+
     # TODO: use a modal here 
     st.success("Invitation créée avec succès !")
-    st.code(invitation_link, language="text")
+    st.code(f"https://progressiontracker.streamlit.app?token={token}", language="text")

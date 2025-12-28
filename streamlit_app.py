@@ -31,11 +31,7 @@ else:
     with st.sidebar:
         # TODO: add user name in the sidebar
         if st.button("Inviter un ami"):
-            invite_friend(
-                cursor,
-                st.session_state.user_id,
-                "https://progressiontracker.streamlit.app"
-            )
+            invite_friend(cursor, st.session_state.user_id)
         if st.button("Se déconnecter"):
             st.session_state.clear()
             st.rerun()
