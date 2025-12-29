@@ -27,6 +27,7 @@ def add_series(cursor, conn, training_id):
             (training_id, exercise[0], weight, reps, rir, curr_date)
         )
         conn.commit()
+        st.session_state["last_added_series"] = (curr_date, weight, reps, rir)
         st.success("Série ajoutée avec succès !")
 
     cursor.execute(
@@ -43,6 +44,9 @@ def add_series(cursor, conn, training_id):
     )
     history = cursor.fetchall()
 
+    if "last_added_series" in st.session_state:
+        history = [st.session_state["last_added_series"]] + list(history)
+        
     if history:
         grouped = defaultdict(list)
         for end_time, w, r, rr in history:
