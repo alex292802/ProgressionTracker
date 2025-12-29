@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+from collections import defaultdict
 
 def add_series(cursor, conn, training_id):
     cursor.execute("SELECT id, name FROM exercice ORDER BY name")
@@ -23,7 +24,6 @@ def add_series(cursor, conn, training_id):
         JOIN training t ON t.id = s.training_id
         WHERE s.exercice_id = %s
           AND t.id <> %s
-          AND t.end_time IS NOT NULL
         ORDER BY t.end_time DESC, s.created_at ASC
         LIMIT 15
         """,
@@ -31,16 +31,17 @@ def add_series(cursor, conn, training_id):
     )
 
     history = cursor.fetchall()
-
     if history:
+        grouped = defaultdict(list)
+        for end_time, weight, reps, rir in history:
+            grouped[end_time.date()].append((weight, reps, rir))
         with st.expander("📈 Historique de l'exercice", expanded=False):
-            for end_time, weight, reps, rir in history:
-                st.write(
-                    f"{end_time:%d/%m} → "
-                    f"{weight} kg | "
-                    f"{reps} reps | "
-                    f"RIR {rir}"
-                )
+            for day in sorted(grouped.keys(), reverse=True):
+                st.markdown(f"**{day:%d/%m/%Y}**")
+                for weight, reps, rir in grouped[day]:
+                    st.write(
+                        f"- {weight} kg | {reps} reps | RIR {rir}"
+                    )
     else:
         st.caption("Aucun historique pour cet exercice.")
 
