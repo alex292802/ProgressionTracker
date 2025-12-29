@@ -68,5 +68,3 @@ def add_series(cursor, conn, training_id):
         history = history or []
         history.insert(0, (curr_date, weight, reps, rir))
         st.success("Série ajoutée avec succès !")
-        time.sleep(1)
-        st.rerun()
