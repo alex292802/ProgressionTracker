@@ -63,4 +63,3 @@ def add_series(cursor, conn, training_id):
         )
         conn.commit()
         st.success("Série ajoutée avec succès !")
-        st.rerun()
