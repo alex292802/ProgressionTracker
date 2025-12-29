@@ -56,14 +56,17 @@ def add_series(cursor, conn, training_id):
     rir = st.number_input("RIR:", min_value=0, value=int(last_rir))
 
     if st.button("Ajouter la série"):
+        curr_date = datetime.now()
         cursor.execute(
             """
             INSERT INTO series (training_id, exercice_id, weight, reps, rir, created_at)
             VALUES (%s, %s, %s, %s, %s, %s)
             """,
-            (training_id, exercise[0], weight, reps, rir, datetime.now())
+            (training_id, exercise[0], weight, reps, rir, curr_date)
         )
         conn.commit()
+        history = history or []
+        history.insert(0, (curr_date, weight, reps, rir))
         st.success("Série ajoutée avec succès !")
-        time.sleep(2)
+        time.sleep(1)
         st.rerun()
