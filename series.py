@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 from datetime import datetime
 from collections import defaultdict
 
@@ -16,7 +17,7 @@ def add_series(cursor, conn, training_id):
     cursor.execute(
         """
         SELECT
-            t.end_time,
+            t.start_time,
             s.weight,
             s.reps,
             s.rir
@@ -24,7 +25,7 @@ def add_series(cursor, conn, training_id):
         JOIN training t ON t.id = s.training_id
         WHERE s.exercice_id = %s
           AND t.id <> %s
-        ORDER BY t.end_time DESC, s.created_at ASC
+        ORDER BY t.start_time DESC, s.created_at ASC
         LIMIT 15
         """,
         (exercise[0], training_id)
@@ -64,3 +65,5 @@ def add_series(cursor, conn, training_id):
         )
         conn.commit()
         st.success("Série ajoutée avec succès !")
+        time.sleep(2)
+        st.rerun()
