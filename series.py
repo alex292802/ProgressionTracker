@@ -17,7 +17,6 @@ def add_series(cursor, conn, training_id):
     reps = st.number_input("Reps:", min_value=0, value=0, key="reps_input")
     rir = st.number_input("RIR:", min_value=0, value=0, key="rir_input")
 
-    # Ajouter la série
     if st.button("Ajouter la série"):
         curr_date = datetime.now()
         cursor.execute(
@@ -28,11 +27,8 @@ def add_series(cursor, conn, training_id):
             (training_id, exercise[0], weight, reps, rir, curr_date)
         )
         conn.commit()
-        # Stocker la nouvelle série dans session_state
-        st.session_state["last_added_series"] = (curr_date, weight, reps, rir)
         st.success("Série ajoutée avec succès !")
 
-    # Récupérer l'historique depuis la DB
     cursor.execute(
         """
         SELECT t.start_time, s.weight, s.reps, s.rir
@@ -47,17 +43,12 @@ def add_series(cursor, conn, training_id):
     )
     history = cursor.fetchall()
 
-    # Ajouter la dernière série ajoutée pour l'afficher immédiatement
-    if "last_added_series" in st.session_state:
-        history = [st.session_state["last_added_series"]] + list(history)
-
-    # Affichage
     if history:
         grouped = defaultdict(list)
         for end_time, w, r, rr in history:
             grouped[end_time.date()].append((w, r, rr))
 
-        with st.expander("📈 Historique de l'exercice", expanded=True):
+        with st.expander("📈 Historique de l'exercice", expanded=False):
             for day in sorted(grouped.keys(), reverse=True):
                 st.markdown(f"**{day:%d/%m/%Y}**")
                 for w, r, rr in grouped[day]:
