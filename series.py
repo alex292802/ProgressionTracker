@@ -12,10 +12,17 @@ def add_series(cursor, conn, training_id):
         format_func=lambda e: e[1],
         key="exercise_select"
     )
+    exercise_id = exercise[0]
 
     weight = st.number_input("Poids:", min_value=0.0, value=0.0, key="weight_input")
     reps = st.number_input("Reps:", min_value=0, value=0, key="reps_input")
     rir = st.number_input("RIR:", min_value=0, value=0, key="rir_input")
+    
+    if "added_series" not in st.session_state:
+        st.session_state.added_series = {}
+
+    if exercise_id not in st.session_state.added_series:
+        st.session_state.added_series[exercise_id] = []
 
     if st.button("Ajouter la série"):
         curr_date = datetime.now()
@@ -24,10 +31,10 @@ def add_series(cursor, conn, training_id):
             INSERT INTO series (training_id, exercice_id, weight, reps, rir, created_at)
             VALUES (%s, %s, %s, %s, %s, %s)
             """,
-            (training_id, exercise[0], weight, reps, rir, curr_date)
+            (training_id, exercise_id, weight, reps, rir, curr_date)
         )
         conn.commit()
-        st.session_state["last_added_series"] = (curr_date, weight, reps, rir)
+        st.session_state.added_series[exercise_id].insert(0, (curr_date, weight, reps, rir))
         st.success("Série ajoutée avec succès !")
 
     cursor.execute(
@@ -40,13 +47,10 @@ def add_series(cursor, conn, training_id):
         ORDER BY t.start_time DESC, s.created_at ASC
         LIMIT 15
         """,
-        (exercise[0], training_id)
+        (exercise_id, training_id)
     )
-    history = cursor.fetchall()
-
-    if "last_added_series" in st.session_state:
-        history = [st.session_state["last_added_series"]] + list(history)
-        
+    history_db = cursor.fetchall()
+    history = st.session_state.added_series.get(exercise_id, []) + list(history_db)
     if history:
         grouped = defaultdict(list)
         for end_time, w, r, rr in history:
