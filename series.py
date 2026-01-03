@@ -58,7 +58,7 @@ def add_series(cursor, conn, training_id, n_best_series=3):
         for end_time, w, r, rr in history:
             training_end_date = end_time.date()
             data_grouped_by_day[training_end_date].append((w, r, rr))
-            scores_per_day[training_end_date] = w * r
+            scores_per_day[training_end_date].append(w * r)
             
         score_per_day = {}
         for day, values in scores_per_day.items():
