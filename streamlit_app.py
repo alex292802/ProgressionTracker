@@ -42,8 +42,7 @@ else:
             select_past_training(users_trainings)  
         else:
             add_series(cursor, conn, st.session_state.training_id)
-            if st.button("Terminer le training"):
-                # This shows the training recap page, the user can chose to end the training
+            if st.button("Récapîtuler mon entrainement"):
                 st.session_state.shown_training_id = st.session_state.training_id
                 st.rerun()
 
