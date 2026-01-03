@@ -13,9 +13,8 @@ def select_past_training(users_trainings):
     )
 
     if st.button("Afficher le détail"):
-        return selected[0]
-
-    return None
+        st.session_state.shown_training_id = selected[0]
+        st.rerun()
 
 def start_new_training(cursor, conn, user_id):
     cursor.execute("SELECT id, name FROM training_type")
@@ -37,9 +36,8 @@ def start_new_training(cursor, conn, user_id):
             (datetime.now(), user_id, selected[0])
         )
         conn.commit()
-        return cursor.fetchone()[0]
-
-    return None
+        st.session_state.training_id = cursor.fetchone()[0]
+        st.rerun()
 
 def get_ongoing_training_id(trainings):
     for training_id, end_time in trainings:

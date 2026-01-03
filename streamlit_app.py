@@ -38,8 +38,8 @@ else:
         render_training_recap(cursor, conn, st.session_state.shown_training_id)
     else:
         if st.session_state.training_id is None:
-            st.session_state.training_id = start_new_training(cursor, conn, st.session_state.user_id)
-            st.session_state.shown_training_id = select_past_training(users_trainings)  
+            start_new_training(cursor, conn, st.session_state.user_id)
+            select_past_training(users_trainings)  
         else:
             add_series(cursor, conn, st.session_state.training_id)
             if st.button("Terminer le training"):
