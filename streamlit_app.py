@@ -45,7 +45,6 @@ else:
             if st.button("Terminer le training"):
                 # This shows the training recap page, the user can chose to end the training
                 st.session_state.shown_training_id = st.session_state.training_id
-                st.session_state.shown_training_id = None
                 st.rerun()
 
 cursor.close()
