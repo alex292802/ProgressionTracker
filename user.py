@@ -48,7 +48,7 @@ def login(cursor):
         user_id, hashed_password = user_infos
         try:
             if ph.verify(hashed_password, password):
-                st.success("Login réussi !")
+                st.success("Connexion réussi !")
                 return user_id
         except Exception:
             st.error("Mot de passe incorrect")
