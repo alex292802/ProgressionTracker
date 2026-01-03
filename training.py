@@ -98,7 +98,7 @@ def render_series_edit(cursor, conn, series):
     cols = st.columns([2, 2, 2, 1, 1])
 
     weight = cols[0].number_input(
-        "kg", value=series["weight"], key=f"w_{series['id']}"
+        "kg", value=series["weight"], step=1.0, key=f"w_{series['id']}"
     )
     reps = cols[1].number_input(
         "reps", value=series["reps"], step=1, key=f"r_{series['id']}"
