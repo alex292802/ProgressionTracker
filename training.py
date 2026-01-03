@@ -76,7 +76,7 @@ def build_muscle_map(rows):
     for series_id, muscle, exercice, weight, reps, rir, created_at in rows:
         muscle_map[muscle][exercice].append({
             "id": series_id,
-            "weight": weight,
+            "weight": float(weight),
             "reps": reps,
             "rir": rir,
             "created_at": created_at,
@@ -93,21 +93,32 @@ def render_series_readonly(index, series):
     )
     
     
-def render_series_edit(cursor, conn, series):
+def render_series_edit(cursor, conn, series, muscle):
     # integers define relative width
     cols = st.columns([2, 2, 2, 1, 1])
-
+    key = f"{series['id']}_{muscle}"
     weight = cols[0].number_input(
-        "kg", value=float(series["weight"]), step=1.0, key=f"w_{series['id']}"
+        "kg",
+        value=series["weight"],
+        step=1.0,
+        min_value=0.0,
+        key=f"w_{key}"
     )
     reps = cols[1].number_input(
-        "reps", value=series["reps"], step=1, key=f"r_{series['id']}"
+        "reps",
+        value=series["reps"],
+        step=1,
+        min_value=0,
+        key=f"r_{key}"
     )
     rir = cols[2].number_input(
-        "RIR", value=series["rir"], step=1, key=f"rir_{series['id']}"
+        "RIR",
+        value=series["rir"],
+        step=1,
+        min_value=0,
+        key=f"rir_{key}"
     )
-
-    if cols[3].button("💾", key=f"save_{series['id']}"):
+    if cols[3].button("💾", key=f"save_{key}"):
         cursor.execute(
             """
             UPDATE series
@@ -119,14 +130,13 @@ def render_series_edit(cursor, conn, series):
         conn.commit()
         st.success("Série modifiée")
         st.rerun()
-
-    if cols[4].button("🗑", key=f"del_{series['id']}"):
+    if cols[4].button("🗑", key=f"del_{key}"):
         cursor.execute(
             "DELETE FROM series WHERE id = %s",
             (series["id"],)
         )
         conn.commit()
-        st.warning("Série supprimée")
+        st.success("Série supprimée")
         st.rerun()
 
 
@@ -137,10 +147,10 @@ def render_muscle_block(cursor, conn, muscle, exercices, edit_mode):
         with st.expander(f"{exercice} ({len(series)} séries)", expanded=False):
             for i, s in enumerate(series, 1):
                 if edit_mode:
-                    render_series_edit(cursor, conn, s)
+                    render_series_edit(cursor, conn, s, muscle)
                 else:
                     render_series_readonly(i, s)
-
+                    
 
 def render_training_actions(cursor, conn, training_id):
     if st.button("Retour"):
