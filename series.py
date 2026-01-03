@@ -1,8 +1,9 @@
 import streamlit as st
+import pandas as pd
 from datetime import datetime
 from collections import defaultdict
 
-def add_series(cursor, conn, training_id):
+def add_series(cursor, conn, training_id, n_best_series=3):
     cursor.execute("SELECT id, name FROM exercice ORDER BY name")
     exercises = cursor.fetchall()
     st.subheader("Ajouter une série")
@@ -52,14 +53,33 @@ def add_series(cursor, conn, training_id):
     history_db = cursor.fetchall()
     history = st.session_state.added_series.get(exercise_id, []) + list(history_db)
     if history:
-        grouped = defaultdict(list)
+        data_grouped_by_day = defaultdict(list)
+        scores_per_day = defaultdict(list)
         for end_time, w, r, rr in history:
-            grouped[end_time.date()].append((w, r, rr))
-
-        with st.expander("📈 Historique de l'exercice", expanded=False):
-            for day in sorted(grouped.keys(), reverse=True):
+            training_end_date = end_time.date()
+            data_grouped_by_day[training_end_date].append((w, r, rr))
+            scores_per_day[training_end_date] = w * r
+            
+        score_per_day = {}
+        for day, values in scores_per_day.items():
+            top_n = sorted(values, reverse=True)[:n_best_series]
+            if len(top_n) < n_best_series:
+                avg = sum(top_n)/len(top_n)
+                top_n += [avg] * (n_best_series - len(top_n))
+            score_per_day[day] = sum(top_n)
+    
+        df = pd.DataFrame({
+            "Date": list(score_per_day.keys()),
+            "Score": list(score_per_day.values())
+        }).sort_values("Date")
+        df = df.set_index("Date")
+        st.subheader("📊 Progression sur l'exercice")
+        st.line_chart(df)
+        
+        with st.expander("📈 Historique détaillé de l'exercice", expanded=False):
+            for day in sorted(data_grouped_by_day.keys(), reverse=True):
                 st.markdown(f"**{day:%d/%m/%Y}**")
-                for w, r, rr in grouped[day]:
+                for w, r, rr in data_grouped_by_day[day]:
                     st.write(f"- {w} kg | {r} reps | RIR {rr}")
     else:
         st.caption("Aucun historique pour cet exercice.")
