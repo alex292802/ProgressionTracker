@@ -94,17 +94,16 @@ def render_training_recap(cursor, conn, training_id):
                             f"**RIR {s['rir']}**"
                         )
     if st.button("Retour"):
-        st.session_state.training_id = st.session_state.shown_training_id
         st.session_state.shown_training_id = None
         st.rerun()
-        
-    if st.button("Terminer"):
-        st.session_state.shown_training_id = None
-        st.session_state.training_id = None
-        cursor.execute(
-            "UPDATE training SET end_time = %s WHERE id = %s",
-            (datetime.now(), training_id)
-        )
-        conn.commit()
-        st.success("Training terminé !")
-        st.rerun()
+    if getattr(st.session_state, "training_id", None) is not None:
+        if st.button("Terminer"):
+            st.session_state.shown_training_id = None
+            st.session_state.training_id = None
+            cursor.execute(
+                "UPDATE training SET end_time = %s WHERE id = %s",
+                (datetime.now(), training_id)
+            )
+            conn.commit()
+            st.success("Training terminé !")
+            st.rerun()
