@@ -94,6 +94,7 @@ def render_training_recap(cursor, conn, training_id):
                             f"**RIR {s['rir']}**"
                         )
     if st.button("Retour"):
+        st.session_state.training_id = st.session_state.shown_training_id
         st.session_state.shown_training_id = None
         st.rerun()
         

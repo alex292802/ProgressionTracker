@@ -35,17 +35,18 @@ else:
     users_trainings = cursor.fetchall()
     st.session_state.training_id = get_ongoing_training_id(users_trainings)
     if st.session_state.training_id is None:
-        st.session_state.training_id = start_new_training(cursor, conn, st.session_state.user_id)
-        st.session_state.shown_training_id = select_past_training(users_trainings)
-    else:
-        if getattr(st.session_state, "shown_training_id", None) is not None:
-           render_training_recap(cursor, conn, st.session_state.shown_training_id)
+        if getattr(st.session_state, "shown_training_id", None) is None:
+            st.session_state.training_id = start_new_training(cursor, conn, st.session_state.user_id)
+            st.session_state.shown_training_id = select_past_training(users_trainings)
         else:
-            add_series(cursor, conn, st.session_state.training_id)
-            if st.button("Terminer le training"):
-                # This shows the training recap page, the user can chose to end the training
-                st.session_state.shown_training_id = st.session_state.training_id
-                st.rerun()
+            render_training_recap(cursor, st.session_state.shown_training_id)
+    else:
+        add_series(cursor, conn, st.session_state.training_id)
+        if st.button("Terminer le training"):
+            # This shows the training recap page, the user can chose to end the training
+            st.session_state.shown_training_id = st.session_state.training_id
+            st.session_state.shown_training_id = None
+            st.rerun()
 
 cursor.close()
 conn.close()
