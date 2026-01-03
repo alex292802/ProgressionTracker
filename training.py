@@ -41,26 +41,13 @@ def start_new_training(cursor, conn, user_id):
 
     return None
 
-def finish_training(cursor, conn, training_id):
-    cursor.execute(
-        "UPDATE training SET end_time = %s WHERE id = %s",
-        (datetime.now(), training_id)
-    )
-    conn.commit()
-
-    st.session_state.shown_training_id = training_id
-    st.session_state.training_id = None
-
-    st.success("Training terminé !")
-    st.rerun()
-
 def get_ongoing_training_id(trainings):
     for training_id, end_time in trainings:
         if end_time is None:
             return training_id
     return None
 
-def render_training_recap(cursor, training_id):
+def render_training_recap(cursor, conn, training_id):
     cursor.execute(
         """
         SELECT
@@ -106,7 +93,17 @@ def render_training_recap(cursor, training_id):
                             f"**{s['reps']} reps** | "
                             f"**RIR {s['rir']}**"
                         )
-    
+    if st.button("Retour"):
+        st.session_state.shown_training_id = None
+        st.rerun()
+        
     if st.button("Terminer"):
         st.session_state.shown_training_id = None
+        st.session_state.training_id = None
+        cursor.execute(
+            "UPDATE training SET end_time = %s WHERE id = %s",
+            (datetime.now(), training_id)
+        )
+        conn.commit()
+        st.success("Training terminé !")
         st.rerun()
