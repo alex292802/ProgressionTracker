@@ -2,3 +2,4 @@ streamlit
 psycopg2-binary
 argon2-cffi
 streamlit_modal
+pandas
