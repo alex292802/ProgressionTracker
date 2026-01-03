@@ -42,7 +42,7 @@ else:
             select_past_training(users_trainings)  
         else:
             add_series(cursor, conn, st.session_state.training_id)
-            if st.button("Récapîtuler mon entrainement"):
+            if st.button("Récapituler mon entrainement"):
                 st.session_state.shown_training_id = st.session_state.training_id
                 st.rerun()
 
