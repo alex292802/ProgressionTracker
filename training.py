@@ -105,6 +105,7 @@ def render_training_recap(cursor, conn, training_id):
             "DELETE FROM training WHERE id = %s",
             (training_id,)
         )
+        conn.commit()
         st.session_state.shown_training_id = None
         st.session_state.training_id = None
         st.success("Entrainement supprimé")
