@@ -91,9 +91,25 @@ def render_training_recap(cursor, conn, training_id):
                             f"**{s['reps']} reps** | "
                             f"**RIR {s['rir']}**"
                         )
+    
     if st.button("Retour"):
         st.session_state.shown_training_id = None
         st.rerun()
+    
+    if st.button("Modifier mon entrainement"):
+        st.session_state.edit_mode = True
+        st.rerun()
+        
+    if st.button("Supprimer mon entrainement"):
+        cursor.execute(
+            "DELETE FROM training WHERE id = %s",
+            (training_id,)
+        )
+        st.session_state.shown_training_id = None
+        st.session_state.training_id = None
+        st.success("Entrainement supprimé")
+        st.rerun()
+        
     if getattr(st.session_state, "training_id", None) is not None:
         if st.button("Terminer"):
             st.session_state.shown_training_id = None
