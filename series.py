@@ -15,7 +15,7 @@ def add_series(cursor, conn, training_id):
     exercise_id = exercise[0]
 
     weight = st.number_input("Poids:", min_value=0.0, value=0.0, key="weight_input")
-    reps = st.number_input("Reps:", min_value=0, value=0, key="reps_input")
+    reps = st.number_input("Répétitions:", min_value=0, value=0, key="reps_input")
     rir = st.number_input("RIR:", min_value=0, value=0, key="rir_input")
     
     if "added_series" not in st.session_state:

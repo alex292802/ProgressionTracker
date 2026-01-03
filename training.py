@@ -98,14 +98,14 @@ def render_series_edit(cursor, conn, series, muscle):
     cols = st.columns([2, 2, 2, 1, 1])
     key = f"{series['id']}_{muscle}"
     weight = cols[0].number_input(
-        "kg",
+        "Poids",
         value=series["weight"],
         step=1.0,
         min_value=0.0,
         key=f"w_{key}"
     )
     reps = cols[1].number_input(
-        "reps",
+        "Répétitions",
         value=series["reps"],
         step=1,
         min_value=0,
@@ -118,7 +118,7 @@ def render_series_edit(cursor, conn, series, muscle):
         min_value=0,
         key=f"rir_{key}"
     )
-    if cols[3].button("💾", key=f"save_{key}"):
+    if cols[3].button("💾", key=f"save_{key}", use_container_width=True):
         cursor.execute(
             """
             UPDATE series
@@ -130,7 +130,7 @@ def render_series_edit(cursor, conn, series, muscle):
         conn.commit()
         st.success("Série modifiée")
         st.rerun()
-    if cols[4].button("🗑", key=f"del_{key}"):
+    if cols[4].button("🗑", key=f"del_{key}", use_container_width=True):
         cursor.execute(
             "DELETE FROM series WHERE id = %s",
             (series["id"],)
