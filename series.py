@@ -77,6 +77,7 @@ def add_series(cursor, conn, training_id, n_best_series=3):
         df = df.set_index("Date_str")
         
         st.subheader("📊 Progression sur l'exercice")
+        df = df.loc[df.index] 
         st.line_chart(df["Score"])
         
         with st.expander("📈 Historique détaillé de l'exercice", expanded=False):
