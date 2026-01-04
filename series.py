@@ -72,9 +72,12 @@ def add_series(cursor, conn, training_id, n_best_series=3):
             "Date": list(score_per_day.keys()),
             "Score": list(score_per_day.values())
         }).sort_values("Date")
-        df = df.set_index("Date")
+        
+        df["Date_str"] = df["Date"].dt.strftime("%d/%m/%y")
+        df = df.set_index("Date_str")
+        
         st.subheader("📊 Progression sur l'exercice")
-        st.line_chart(df)
+        st.line_chart(df["Score"])
         
         with st.expander("📈 Historique détaillé de l'exercice", expanded=False):
             for day in sorted(data_grouped_by_day.keys(), reverse=True):
