@@ -69,7 +69,7 @@ def add_series(cursor, conn, training_id, n_best_series=3):
             score_per_day[day] = sum(top_n)
     
         df = pd.DataFrame({
-            "Date": list(score_per_day.keys()),
+            "Date": pd.to_datetime(score_per_day.keys()),
             "Score": list(score_per_day.values())
         }).sort_values("Date")
         
