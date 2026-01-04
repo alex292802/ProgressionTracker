@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 from collections import defaultdict
+import altair as alt
 
 def add_series(cursor, conn, training_id, n_best_series=3):
     cursor.execute("SELECT id, name FROM exercice ORDER BY name")
@@ -72,12 +73,26 @@ def add_series(cursor, conn, training_id, n_best_series=3):
             "Date": pd.to_datetime(list(score_per_day.keys())),
             "Score": list(score_per_day.values())
         }).sort_values("Date")
-        
-        df["Date_str"] = df["Date"].dt.strftime("%d/%m/%y")
-        df = df.set_index("Date_str")
-        
-        st.subheader("📊 Progression sur l'exercice")
-        st.line_chart(df["Score"])
+  
+        chart = (
+            alt.Chart(df)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X("Date:T", axis=alt.Axis(format="%d/%m/%y", labelAngle=-45)),
+                y=alt.Y("Score:Q"),
+                tooltip=[
+                    alt.Tooltip("Date:T", format="%d/%m/%y"),
+                    alt.Tooltip("Score:Q")
+                ]
+            )
+            .properties(
+                width=700,
+                height=400,
+                title="📊 Progression sur l'exercice"
+            )
+        )
+
+        st.altair_chart(chart, use_container_width=True)
         
         with st.expander("📈 Historique détaillé de l'exercice", expanded=False):
             for day in sorted(data_grouped_by_day.keys(), reverse=True):
